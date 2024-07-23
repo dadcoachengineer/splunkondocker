@@ -1,0 +1,35 @@
+version: "3.6"
+
+services:
+  splunk:
+    image: splunk/splunk:latest
+    environment:
+      - SPLUNK_START_ARGS=--accept-license
+      - SPLUNK_PASSWORD=
+      - TZ=Americas/Chicago
+    ports:
+      - 8000:8000
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - splunk_config:/opt/splunk/etc
+      - splunk_data:/opt/splunk/var 
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.arc == x86
+
+volumes:
+  splunk_config:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=192.168.1.xxx,nolock,soft,rw
+      device: ":/volume1/docker/splunk/config"
+  splunk_data:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=192.168.1.xxx,nolock,soft,rw
+      device: ":/volume1/shared/splunk/data"
